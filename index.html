@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asesmen Diagnostik Kemampuan Awal - Luas Permukaan Tabung</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tone.js untuk Efek Suara Interaktif -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Canvas Confetti untuk Animasi Kemenangan -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- MathJax untuk Render Rumus Matematika -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            blue: '#2563EB',
+                            teal: '#0D9488',
+                            amber: '#D97706',
+                            rose: '#E11D48',
+                            purple: '#7C3AED',
+                            dark: '#0F172A',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #f8fafc;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.88);
+            backdrop-filter: blur(16px);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .touch-btn {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            touch-action: manipulation;
+        }
+
+        .touch-btn:active {
+            transform: scale(0.96);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.9); }
+        }
+        .glow-active {
+            animation: pulse-glow 2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 md:p-6 text-slate-100">
+
+    <!-- Header Top Area -->
+    <header class="w-full max-w-7xl mx-auto glass-panel rounded-2xl p-4 mb-4 flex items-center justify-between border-b-4 border-blue-500">
+        <div class="flex items-center space-x-3">
+            <div class="bg-blue-600 text-white p-3 rounded-xl text-2xl shadow-lg">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300">
+                    DIAGNOSTIK KEMAMPUAN AWAL: TABUNG
+                </h1>
+                <p class="text-xs md:text-sm text-slate-300">Cek Kesiapan Belajar Luas Permukaan Tabung (Papan Interaktif Digital)</p>
+            </div>
+        </div>
+
+        <!-- Right Header Actions -->
+        <div class="flex items-center space-x-3">
+            <div class="hidden sm:flex items-center bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700">
+                <i class="fa-solid fa-star text-amber-400 text-xl mr-2"></i>
+                <span class="text-sm font-semibold text-slate-400 mr-2">Skor:</span>
+                <span id="score-display" class="text-xl font-bold text-amber-400">0</span>
+            </div>
+            <button onclick="toggleFullscreen()" title="Layar Penuh" class="touch-btn bg-slate-800 hover:bg-slate-700 text-slate-200 p-3 rounded-xl border border-slate-600 focus:outline-none">
+                <i class="fa-solid fa-expand text-xl"></i>
+            </button>
+            <button id="sound-toggle" onclick="toggleSound()" title="Suara" class="touch-btn bg-slate-800 hover:bg-slate-700 text-slate-200 p-3 rounded-xl border border-slate-600 focus:outline-none">
+                <i id="sound-icon" class="fa-solid fa-volume-high text-xl"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-7xl mx-auto flex-1 flex flex-col justify-center my-auto">
+
+        <!-- 1. START SCREEN -->
+        <div id="screen-start" class="glass-panel rounded-3xl p-8 md:p-12 text-center max-w-3xl mx-auto my-auto w-full border-t-4 border-teal-400">
+            <div class="inline-block p-4 bg-teal-500/20 rounded-full text-teal-400 mb-6 text-5xl">
+                <i class="fa-solid fa-brain"></i>
+            </div>
+            <h2 class="text-3xl md:text-5xl font-black mb-4 text-white">Tes Kesiapan Belajar Tabung</h2>
+            <p class="text-slate-300 text-base md:text-lg mb-8 leading-relaxed">
+                Jawab 5 pertanyaan interaktif di bawah ini untuk mengecek kemampuan prasyaratmu (Luas Lingkaran, Keliling, Jaring-jaring, & Komponen Tabung) sebelum menyelesaikan masalah dunia nyata!
+            </p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8 text-left">
+                <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700 text-center">
+                    <i class="fa-solid fa-shapes text-blue-400 text-xl mb-1"></i>
+                    <h3 class="font-bold text-xs text-white">Jaring-jaring</h3>
+                </div>
+                <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700 text-center">
+                    <i class="fa-solid fa-circle text-teal-400 text-xl mb-1"></i>
+                    <h3 class="font-bold text-xs text-white">Luas Alas ($r$)</h3>
+                </div>
+                <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700 text-center">
+                    <i class="fa-solid fa-ruler-horizontal text-amber-400 text-xl mb-1"></i>
+                    <h3 class="font-bold text-xs text-white">Keliling Alas</h3>
+                </div>
+                <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700 text-center">
+                    <i class="fa-solid fa-box text-rose-400 text-xl mb-1"></i>
+                    <h3 class="font-bold text-xs text-white">Bentuk Kontekstual</h3>
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="touch-btn glow-active bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-500 hover:to-teal-400 text-white font-extrabold text-xl md:text-2xl py-5 px-12 rounded-2xl shadow-2xl w-full sm:w-auto transform hover:-translate-y-1">
+                <i class="fa-solid fa-play mr-3"></i> MULAI ASESMEN
+            </button>
+        </div>
+
+        <!-- 2. GAMEPLAY SCREEN -->
+        <div id="screen-game" class="hidden flex-col gap-6 w-full">
+            
+            <!-- Progress Bar & Hint Bar -->
+            <div class="glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-3 w-full md:w-1/3">
+                    <span id="question-number" class="text-sm font-bold bg-blue-600 text-white px-3 py-1 rounded-lg whitespace-nowrap">Soal 1 / 5</span>
+                    <div class="w-full bg-slate-700 h-3 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-teal-400 h-full transition-all duration-500" style="width: 20%;"></div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 ml-auto">
+                    <!-- Hint Button -->
+                    <button onclick="toggleHint()" class="touch-btn bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 px-4 py-2 rounded-xl text-sm font-bold flex items-center space-x-2">
+                        <i class="fa-solid fa-lightbulb text-amber-400"></i>
+                        <span>Bantuan Konsep</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hint Box -->
+            <div id="hint-box" class="hidden glass-panel border-l-4 border-amber-400 p-4 rounded-2xl bg-amber-950/30 text-amber-100 text-sm md:text-base animate-fade-in">
+                <div class="flex items-start space-x-3">
+                    <i class="fa-solid fa-circle-info text-amber-400 text-xl mt-1"></i>
+                    <div>
+                        <h4 class="font-bold text-amber-300">Konsep Prasyarat:</h4>
+                        <p id="hint-text" class="mt-1">Pikirkan komponen atau rumus dasarnya!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question & Interactive Area Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left: Question & Illustration -->
+                <div class="lg:col-span-5 glass-panel rounded-3xl p-6 flex flex-col justify-between">
+                    <div>
+                        <!-- Category Badge -->
+                        <div class="inline-flex items-center space-x-2 bg-slate-800 text-blue-400 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold mb-3">
+                            <i id="q-icon" class="fa-solid fa-circle-question"></i>
+                            <span id="q-category">Konsep Prasyarat</span>
+                        </div>
+                        <h3 id="q-title" class="text-xl md:text-2xl font-bold text-white mb-3">Judul Soal</h3>
+                        <p id="q-text" class="text-slate-300 text-base md:text-lg leading-relaxed mb-4">
+                            Deskripsi teks soal diagnostik...
+                        </p>
+                    </div>
+
+                    <!-- Visual Illustration Card -->
+                    <div class="bg-slate-900/80 rounded-2xl p-4 border border-slate-700/80 flex flex-col items-center justify-center my-2 relative min-h-[160px]">
+                        <div id="q-svg-container" class="w-full flex justify-center items-center">
+                            <!-- Dynamic SVG Graphic injected here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Answer Options -->
+                <div class="lg:col-span-7 flex flex-col justify-between gap-4">
+                    <div id="options-container" class="grid grid-cols-1 gap-4">
+                        <!-- Options generated via JS -->
+                    </div>
+
+                    <!-- Feedback Box -->
+                    <div id="feedback-panel" class="hidden glass-panel rounded-2xl p-5 border-2 text-left animate-bounce-in">
+                        <div class="flex items-start space-x-3">
+                            <div id="feedback-icon" class="text-3xl"></div>
+                            <div class="flex-1">
+                                <h4 id="feedback-title" class="font-bold text-lg mb-1">-</h4>
+                                <p id="feedback-explanation" class="text-sm md:text-base text-slate-300 leading-relaxed"></p>
+                            </div>
+                        </div>
+                        <button id="next-btn" onclick="nextQuestion()" class="touch-btn mt-4 w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl text-lg flex items-center justify-center space-x-2 shadow-lg">
+                            <span>Lanjut Soal Berikutnya</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 3. DIAGNOSTIC RESULT SCREEN -->
+        <div id="screen-result" class="hidden glass-panel rounded-3xl p-6 md:p-10 max-w-4xl mx-auto my-auto w-full border-t-4 border-amber-400">
+            <div class="text-center mb-6">
+                <div class="inline-block p-4 bg-amber-500/20 rounded-full text-amber-400 mb-2 text-4xl">
+                    <i class="fa-solid fa-chart-column"></i>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white">Laporan Diagnostik Kemampuan Awal</h2>
+                <p class="text-slate-300 text-sm md:text-base mt-1">Pemetaan Kesiapan Belajar Materi Luas Permukaan Tabung</p>
+            </div>
+
+            <!-- Score Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl text-center">
+                    <span class="text-xs text-slate-400 font-semibold block uppercase">Skor Prasyarat</span>
+                    <span id="final-score" class="text-4xl font-black text-amber-400">0</span>
+                </div>
+                <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl text-center">
+                    <span class="text-xs text-slate-400 font-semibold block uppercase">Jawaban Benar</span>
+                    <span id="final-correct" class="text-4xl font-black text-teal-400">0 / 5</span>
+                </div>
+                <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl text-center">
+                    <span class="text-xs text-slate-400 font-semibold block uppercase">Kesiapan Belajar</span>
+                    <span id="final-mastery" class="text-lg font-bold text-blue-400 mt-2 block">Siap</span>
+                </div>
+            </div>
+
+            <!-- Recommendation Box -->
+            <div id="recommendation-box" class="bg-blue-950/40 border border-blue-500/40 p-4 rounded-2xl mb-6 text-sm text-blue-200">
+                <h4 class="font-bold text-blue-300 flex items-center mb-1">
+                    <i class="fa-solid fa-chalkboard-user mr-2"></i> Rekomendasi Aksi Guru:
+                </h4>
+                <p id="recommendation-text">Rekomendasi tindakan pembelajaran...</p>
+            </div>
+
+            <!-- Diagnostic Breakdown List -->
+            <div class="bg-slate-900/70 rounded-2xl p-4 border border-slate-800 mb-6 max-h-[240px] overflow-y-auto">
+                <h3 class="font-bold text-base text-white mb-3 flex items-center">
+                    <i class="fa-solid fa-list-check text-blue-400 mr-2"></i> Analisis Pemahaman per Indikator
+                </h3>
+                <div id="diagnostic-list" class="space-y-3">
+                    <!-- Diagnostic items injected via JS -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button onclick="resetGame()" class="touch-btn bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-4 px-8 rounded-2xl text-lg flex items-center justify-center space-x-2 shadow-xl">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Ulangi Asesmen</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-7xl mx-auto text-center text-xs text-slate-400 py-3 mt-2">
+        Media Pembelajaran Asesmen Diagnostik Matematika &copy; 2026 - Papan Interaktif Digital
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* ----------------------------------------------------
+           DATA SOAL ASESMEN DIAGNOSTIK KEMAMPUAN AWAL
+        ---------------------------------------------------- */
+        const questionsData = [
+            {
+                id: 1,
+                title: "Soal 1: Jaring-jaring Tabung",
+                category: "Unsur & Jaring-jaring",
+                icon: "fa-shapes",
+                text: "Jika sebuah tabung utuh dibuka (direnggangkan) pada bagian rusuk-rusuknya, bangun datar apa saja yang membentuk jaring-jaring tabung tersebut?",
+                svg: `
+                    <svg width="220" height="130" viewBox="0 0 240 140">
+                        <circle cx="120" cy="22" r="18" fill="#3b82f6" stroke="#93c5fd" stroke-width="2"/>
+                        <rect x="50" y="48" width="140" height="48" rx="4" fill="#0d9488" stroke="#5eead4" stroke-width="2"/>
+                        <circle cx="120" cy="118" r="18" fill="#3b82f6" stroke="#93c5fd" stroke-width="2"/>
+                        <text x="120" y="26" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">Lingkaran (Atas)</text>
+                        <text x="120" y="77" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">Persegi Panjang (Selimut)</text>
+                        <text x="120" y="122" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">Lingkaran (Alas)</text>
+                    </svg>
+                `,
+                formattedOptions: [
+                    { id: 'A', text: "2 Lingkaran kongruen dan 1 Persegi Panjang", correct: true, diag: "Paham Utuh: Siswa menguasai bentuk bangun datar pembentuk jaring-jaring tabung." },
+                    { id: 'B', text: "2 Lingkaran dan 1 Segitiga sama kaki", correct: false, diag: "Miskonsepsi Jaring-jaring: Mengira selimut tabung berbentuk segitiga (tertukar dengan kerucut)." },
+                    { id: 'C', text: "1 Lingkaran dan 2 Persegi Panjang", correct: false, diag: "Miskonsepsi Unsur: Lupa bahwa tabung utuh memiliki 2 lingkaran (alas dan tutup)." },
+                    { id: 'D', text: "2 Lingkaran dan 1 Trapesium", correct: false, diag: "Miskonsepsi Bentuk: Salah mengidentifikasi selimut tabung." }
+                ],
+                hint: "Tabung memiliki alas berbentuk lingkaran, tutup berbentuk lingkaran yang sama, serta selimut jika dibuka berbentuk segi empat.",
+                explanation: "Jaring-jaring tabung utuh terdiri dari **2 Lingkaran kongruen** (alas & tutup) dan **1 Persegi Panjang** (selimut tabung)."
+            },
+            {
+                id: 2,
+                title: "Soal 2: Menghitung Luas Alas Lingkaran",
+                category: "Luas Lingkaran ($L = \\pi r^2$)",
+                icon: "fa-circle",
+                text: "Sebuah alas tempat pensil berbentuk lingkaran memiliki jari-jari $r = 7\\text{ cm}$. Berapakah luas alas lingkaran tempat pensil tersebut? (Gunakan $\\pi = \\frac{22}{7}$)",
+                svg: `
+                    <svg width="160" height="130" viewBox="0 0 180 140">
+                        <circle cx="90" cy="70" r="50" fill="#2563eb" fill-opacity="0.3" stroke="#60a5fa" stroke-width="3"/>
+                        <line x1="90" y1="70" x2="140" y2="70" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow)"/>
+                        <circle cx="90" cy="70" r="4" fill="#ffffff"/>
+                        <text x="115" y="62" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="bold">r = 7 cm</text>
+                    </svg>
+                `,
+                formattedOptions: [
+                    { id: 'A', text: "$44\\text{ cm}^2$", correct: false, diag: "Miskonsepsi Rumus: Siswa menghitung Keliling Lingkaran ($2\\pi r$), bukan Luas Lingkaran!" },
+                    { id: 'B', text: "$154\\text{ cm}^2$", correct: true, diag: "Paham Utuh: Siswa mampu menghitung luas lingkaran alas $L = \\pi r^2$ dengan benar." },
+                    { id: 'C', text: "$308\\text{ cm}^2$", correct: false, diag: "Miskonsepsi Perkalian: Mengalikan hasil $154$ dengan $2$ (mungkin mengira 2 lingkaran)." },
+                    { id: 'D', text: "$49\\text{ cm}^2$", correct: false, diag: "Miskonsepsi Konsep Pi: Hanya menghitung $r^2 = 7^2$, lupa mengalikan dengan $\\pi$." }
+                ],
+                hint: "Gunakan rumus Luas Lingkaran: $L = \\pi \\times r^2 = \\frac{22}{7} \\times 7 \\times 7$.",
+                explanation: "<b>Rumus Luas Lingkaran:</b> $L = \\pi r^2$<br><b>Hitungan:</b> $L = \\frac{22}{7} \\times 7 \\times 7 = 22 \\times 7 = 154\\text{ cm}^2$."
+            },
+            {
+                id: 3,
+                title: "Soal 3: Hubungan Keliling & Panjang Selimut",
+                category: "Keliling Lingkaran ($K = 2\\pi r$)",
+                icon: "fa-ruler-horizontal",
+                text: "Sebuah kaleng memiliki jari-jari alas $r = 7\\text{ cm}$. Panjang lembaran selimut persegi panjang yang mengelilingi kaleng tersebut **sama dengan keliling alasnya**. Berapakah panjang selimut tersebut? (Gunakan $\\pi = \\frac{22}{7}$)",
+                svg: `
+                    <svg width="220" height="120" viewBox="0 0 240 120">
+                        <rect x="30" y="30" width="180" height="50" fill="#14b8a6" stroke="#2dd4bf" stroke-width="2" rx="4"/>
+                        <line x1="30" y1="90" x2="210" y2="90" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4"/>
+                        <text x="120" y="60" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Panjang Selimut = Keliling Alas</text>
+                        <text x="120" y="110" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="bold">Panjang (p) = ?</text>
+                    </svg>
+                `,
+                formattedOptions: [
+                    { id: 'A', text: "$44\\text{ cm}$", correct: true, diag: "Paham Utuh: Siswa memahami bahwa panjang selimut sama dengan keliling alas $K = 2\\pi r$." },
+                    { id: 'B', text: "$154\\text{ cm}$", correct: false, diag: "Miskonsepsi Rumus: Menghitung Luas Lingkaran ($\\pi r^2$), bukan Keliling Lingkaran." },
+                    { id: 'C', text: "$22\\text{ cm}$", correct: false, diag: "Miskonsepsi: Hanya menghitung $\\pi \\times r$, lupa dikali 2." },
+                    { id: 'D', text: "$14\\text{ cm}$", correct: false, diag: "Miskonsepsi: Menganggap panjang selimut sama dengan diameter ($2r$)." }
+                ],
+                hint: "Panjang selimut melingkari alas lingkaran. Jadi, Panjang = Keliling Lingkaran = $2 \\times \\pi \\times r$.",
+                explanation: "<b>Panjang Selimut</b> = Keliling Lingkaran Alas<br><b>Rumus:</b> $K = 2 \\times \\pi \\times r = 2 \\times \\frac{22}{7} \\times 7 = 44\\text{ cm}$."
+            },
+            {
+                id: 4,
+                title: "Soal 4: Komponen Wadah Tanpa Tutup",
+                category: "Penalaran Kontekstual",
+                icon: "fa-wine-glass",
+                text: "Siswa ingin membalut bagian luar **cangkir/gelas minum** (berbentuk tabung **tanpa tutup**) dengan kain flanel. Komponen bagian mana saja yang perlu dilapisi kain flanel?",
+                svg: `
+                    <svg width="160" height="130" viewBox="0 0 180 140">
+                        <path d="M 45 25 L 45 115 A 45 15 0 0 0 135 115 L 135 25 Z" fill="#f97316" fill-opacity="0.8" stroke="#fb923c" stroke-width="3"/>
+                        <ellipse cx="90" cy="115" rx="45" ry="15" fill="#ea580c" stroke="#fdba74" stroke-width="2"/>
+                        <ellipse cx="90" cy="25" rx="45" ry="15" fill="none" stroke="#fdba74" stroke-width="2" stroke-dasharray="4"/>
+                        <text x="90" y="20" text-anchor="middle" fill="#fca5a5" font-size="10" font-weight="bold">Atas Terbuka</text>
+                        <text x="90" y="70" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Selimut + Alas Bawah</text>
+                    </svg>
+                `,
+                formattedOptions: [
+                    { id: 'A', text: "Selimut saja", correct: false, diag: "Miskonsepsi Konteks: Lupa bahwa cangkir/gelas juga memiliki bagian alas bawah yang menutup air." },
+                    { id: 'B', text: "1 Alas (Bawah) + 1 Selimut", correct: true, diag: "Paham Utuh: Mampu membedakan tabung tanpa tutup terdiri dari 1 alas dan 1 selimut." },
+                    { id: 'C', text: "2 Lingkaran + 1 Selimut", correct: false, diag: "Miskonsepsi Konteks: Menggunakan rumus tabung lengkap/utuh. Gelas tidak punya tutup atas!" },
+                    { id: 'D', text: "2 Lingkaran saja", correct: false, diag: "Miskonsepsi Unsur: Lupa menghitung selimut tabung." }
+                ],
+                hint: "Cangkir/gelas memiliki alas bawah dan selimut samping, tetapi **bagian atasnya terbuka** (tanpa tutup).",
+                explanation: "Benda tabung **tanpa tutup** (seperti gelas/cangkir) terdiri dari **1 Luas Alas + 1 Luas Selimut** ($L = \\pi r^2 + 2\\pi r t$)."
+            },
+            {
+                id: 5,
+                title: "Soal 5: Luas Permukaan Kaleng Utuh",
+                category: "Kesiapan Gabungan ($2\\pi r(r+t)$)",
+                icon: "fa-cookie-bite",
+                text: "Sebuah kaleng biskuit **tertutup rapat** memiliki jari-jari $r = 7\\text{ cm}$ dan tinggi $t = 10\\text{ cm}$. Manakah gabungan perhitungan yang benar untuk mencari seluruh luas permukaan seng kaleng tersebut?",
+                svg: `
+                    <svg width="180" height="140" viewBox="0 0 200 150">
+                        <ellipse cx="100" cy="30" rx="50" ry="16" fill="#eab308" stroke="#fef08a" stroke-width="2"/>
+                        <path d="M 50 30 L 50 120 A 50 16 0 0 0 150 120 L 150 30 Z" fill="#ca8a04" stroke="#fde047" stroke-width="2"/>
+                        <ellipse cx="100" cy="120" rx="50" ry="16" fill="#a16207" stroke="#fef08a" stroke-width="2"/>
+                        <text x="100" y="75" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">r = 7 cm, t = 10 cm</text>
+                    </svg>
+                `,
+                formattedOptions: [
+                    { id: 'A', text: "Luas 2 Alas + Luas Selimut = $2(154) + 440 = 748\\text{ cm}^2$", correct: true, diag: "Paham Utuh: Siap melakukan perhitungan luas permukaan tabung kontekstual utuh." },
+                    { id: 'B', text: "Luas Selimut saja = $440\\text{ cm}^2$", correct: false, diag: "Miskonsepsi: Hanya menghitung selimut saja, lupa bahwa kaleng biskuit tertutup utuh." },
+                    { id: 'C', text: "Luas 1 Alas + Luas Selimut = $154 + 440 = 594\\text{ cm}^2$", correct: false, diag: "Miskonsepsi: Menganggap kaleng biskuit tanpa tutup." },
+                    { id: 'D', text: "Luas 2 Alas saja = $2 \\times 154 = 308\\text{ cm}^2$", correct: false, diag: "Miskonsepsi: Lupa menghitung selimut tabung." }
+                ],
+                hint: "Kaleng biskuit utuh = 2 x Luas Lingkaran (alas & tutup) + Luas Selimut ($2\\pi r t$).",
+                explanation: "<b>Kaleng Biskuit Utuh:</b><br>• Luas 2 Lingkaran = $2 \\times 154 = 308\\text{ cm}^2$<br>• Luas Selimut = $2 \\times \\frac{22}{7} \\times 7 \\times 10 = 440\\text{ cm}^2$<br>• **Total Luas:** $308 + 440 = 748\\text{ cm}^2$."
+            }
+        ];
+
+        /* ----------------------------------------------------
+           STATE MANAGEMENT
+        ---------------------------------------------------- */
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let soundEnabled = true;
+        let userAnswers = [];
+
+        const synth = new Tone.Synth().toDestination();
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                Tone.start();
+                if (type === 'correct') {
+                    synth.triggerAttackRelease("C5", "8n", Tone.now());
+                    synth.triggerAttackRelease("G5", "8n", Tone.now() + 0.15);
+                } else if (type === 'wrong') {
+                    synth.triggerAttackRelease("G3", "8n", Tone.now());
+                    synth.triggerAttackRelease("C3", "8n", Tone.now() + 0.15);
+                } else if (type === 'click') {
+                    synth.triggerAttackRelease("E5", "16n");
+                } else if (type === 'win') {
+                    synth.triggerAttackRelease("C4", "8n", Tone.now());
+                    synth.triggerAttackRelease("E4", "8n", Tone.now() + 0.1);
+                    synth.triggerAttackRelease("G4", "8n", Tone.now() + 0.2);
+                    synth.triggerAttackRelease("C5", "4n", Tone.now() + 0.3);
+                }
+            } catch (e) {
+                console.log("Audio play error", e);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const soundIcon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                soundIcon.className = "fa-solid fa-volume-high text-xl text-slate-200";
+            } else {
+                soundIcon.className = "fa-solid fa-volume-xmark text-xl text-rose-400";
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error entering fullscreen: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        /* ----------------------------------------------------
+           GAME ENGINE & FLOW
+        ---------------------------------------------------- */
+        function startGame() {
+            playSound('click');
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            document.getElementById('score-display').textContent = score;
+
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+            document.getElementById('screen-game').classList.add('flex');
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = questionsData[currentQuestionIndex];
+
+            document.getElementById('hint-box').classList.add('hidden');
+            document.getElementById('feedback-panel').classList.add('hidden');
+
+            document.getElementById('question-number').textContent = `Soal ${currentQuestionIndex + 1} / ${questionsData.length}`;
+            const progressPercent = ((currentQuestionIndex + 1) / questionsData.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            document.getElementById('q-title').textContent = q.title;
+            document.getElementById('q-category').textContent = q.category;
+            document.getElementById('q-icon').className = `fa-solid ${q.icon}`;
+            document.getElementById('q-text').innerHTML = q.text;
+            document.getElementById('q-svg-container').innerHTML = q.svg;
+            document.getElementById('hint-text').innerHTML = q.hint;
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            q.formattedOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "touch-btn w-full text-left bg-slate-800/90 hover:bg-slate-700/90 border-2 border-slate-700 p-4 md:p-5 rounded-2xl flex items-center justify-between space-x-4 shadow-lg focus:outline-none";
+                btn.onclick = () => checkAnswer(opt, btn);
+
+                btn.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <span class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-600/30 border border-blue-400/40 text-blue-300 font-black text-lg md:text-xl flex items-center justify-center shrink-0">
+                            ${opt.id}
+                        </span>
+                        <span class="text-base md:text-lg font-bold text-slate-100">${opt.text}</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-500"></i>
+                `;
+                container.appendChild(btn);
+            });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function toggleHint() {
+            playSound('click');
+            const hintBox = document.getElementById('hint-box');
+            hintBox.classList.toggle('hidden');
+        }
+
+        function checkAnswer(selectedOpt, btnElement) {
+            playSound('click');
+            const q = questionsData[currentQuestionIndex];
+            const isCorrect = selectedOpt.correct;
+
+            const allButtons = document.querySelectorAll('#options-container button');
+            allButtons.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+
+            btnElement.classList.remove('opacity-50');
+            if (isCorrect) {
+                btnElement.classList.remove('bg-slate-800/90', 'border-slate-700');
+                btnElement.classList.add('bg-emerald-900/80', 'border-emerald-400');
+                playSound('correct');
+                score += 20;
+                document.getElementById('score-display').textContent = score;
+            } else {
+                btnElement.classList.remove('bg-slate-800/90', 'border-slate-700');
+                btnElement.classList.add('bg-rose-900/80', 'border-rose-400');
+                playSound('wrong');
+
+                allButtons.forEach((b, idx) => {
+                    if (q.formattedOptions[idx].correct) {
+                        b.classList.remove('opacity-50');
+                        b.classList.add('bg-emerald-900/50', 'border-emerald-500');
+                    }
+                });
+            }
+
+            userAnswers.push({
+                questionId: q.id,
+                category: q.category,
+                isCorrect: isCorrect,
+                selectedOption: selectedOpt.id,
+                diagnosticMsg: selectedOpt.diag
+            });
+
+            const feedbackPanel = document.getElementById('feedback-panel');
+            const feedbackIcon = document.getElementById('feedback-icon');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackExp = document.getElementById('feedback-explanation');
+
+            feedbackPanel.classList.remove('hidden');
+            if (isCorrect) {
+                feedbackPanel.className = "glass-panel rounded-2xl p-5 border-2 border-emerald-500 bg-emerald-950/40 text-left";
+                feedbackIcon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i>`;
+                feedbackTitle.textContent = "Analisis Tepat!";
+                feedbackTitle.className = "font-bold text-lg text-emerald-400 mb-1";
+            } else {
+                feedbackPanel.className = "glass-panel rounded-2xl p-5 border-2 border-rose-500 bg-rose-950/40 text-left";
+                feedbackIcon.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-400"></i>`;
+                feedbackTitle.textContent = "Catatan Diagnostik";
+                feedbackTitle.className = "font-bold text-lg text-rose-400 mb-1";
+            }
+
+            feedbackExp.innerHTML = `${selectedOpt.diag}<br><br><span class="text-xs text-slate-400 font-bold">Pembahasan Konsep:</span><br>${q.explanation}`;
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function nextQuestion() {
+            playSound('click');
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questionsData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        /* ----------------------------------------------------
+           DIAGNOSTIC RESULTS DISPLAY
+        ---------------------------------------------------- */
+        function showResults() {
+            playSound('win');
+            confetti({
+                particleCount: 120,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('flex');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            const correctCount = userAnswers.filter(a => a.isCorrect).length;
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-correct').textContent = `${correctCount} / 5`;
+
+            const masteryElem = document.getElementById('final-mastery');
+            const recTextElem = document.getElementById('recommendation-text');
+
+            if (correctCount === 5) {
+                masteryElem.textContent = "Siap Belajar Lanjut (Paham Utuh)";
+                masteryElem.className = "text-lg font-bold text-emerald-400 mt-2 block";
+                recTextElem.textContent = "Siswa telah menguasai seluruh konsep prasyarat (Luas & Keliling Lingkaran, Jaring-jaring Tabung). Siap langsung masuk ke pemecahan masalah kontekstual Luas Permukaan Tabung kompleks.";
+            } else if (correctCount >= 3) {
+                masteryElem.textContent = "Perlu Pendampingan Ringan";
+                masteryElem.className = "text-lg font-bold text-amber-400 mt-2 block";
+                recTextElem.textContent = "Siswa memahami sebagian besar konsep dasar, namun perlu diingatkan kembali mengenai pembedaan tabung utuh vs tanpa tutup atau rumus keliling alas lingkaran.";
+            } else {
+                masteryElem.textContent = "Perlu Remedial Prasyarat";
+                masteryElem.className = "text-lg font-bold text-rose-400 mt-2 block";
+                recTextElem.textContent = "Siswa masih mengalami miskonsepsi pada rumus dasar Luas/Keliling Lingkaran atau jaring-jaring tabung. Disarankan mengulang penguatan konsep lingkaran & jaring-jaring sebelum masuk ke masalah kontekstual.";
+            }
+
+            const diagList = document.getElementById('diagnostic-list');
+            diagList.innerHTML = '';
+
+            userAnswers.forEach((ans, idx) => {
+                const item = document.createElement('div');
+                item.className = `p-3.5 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-2 ${
+                    ans.isCorrect ? 'bg-emerald-950/30 border-emerald-500/40' : 'bg-rose-950/30 border-rose-500/40'
+                }`;
+
+                item.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <span class="mt-0.5 ${ans.isCorrect ? 'text-emerald-400' : 'text-rose-400'} font-bold">
+                            <i class="fa-solid ${ans.isCorrect ? 'fa-check-circle' : 'fa-times-circle'} text-xl"></i>
+                        </span>
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Indikator ${idx + 1}: ${ans.category}</span>
+                            <p class="text-sm text-slate-200 mt-0.5 font-medium">${ans.diagnosticMsg}</p>
+                        </div>
+                    </div>
+                `;
+                diagList.appendChild(item);
+            });
+        }
+
+        function resetGame() {
+            startGame();
+        }
+    </script>
+</body>
+</html>
